@@ -264,13 +264,13 @@
           <div class="arc-header">
             <span class="arc-month">${arc.label}</span>
             <span class="arc-net" style="color:${arc.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${arc.net} ₴</span>
+            <div class="arc-roi">ROI: ${arc.roi}%</div>
           </div>
           <div class="arc-grid">
             <div class="arc-stat"><span class="label" style="font-size:10px">Дохід</span><span class="val" style="font-size:14px">${arc.income}</span></div>
             <div class="arc-stat"><span class="label" style="font-size:10px">Витрати</span><span class="val" style="font-size:14px">${arc.expense}</span></div>
             <div class="arc-stat"><span class="label" style="font-size:10px">Клієнти</span><span class="val" style="font-size:14px">${arc.clients}</span></div>
           </div>
-          <div class="arc-roi">ROI: ${arc.roi}%</div>
         </div>`).join('');
     }
 
