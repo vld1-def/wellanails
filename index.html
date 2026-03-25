@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -22,25 +25,38 @@
     @keyframes move { from { transform: translate(0, 0); } to { transform: translate(100px, 100px); } }
 
     body { display: flex; flex-direction: column; background: transparent; }
-    .header { text-align: center; padding-top: env(safe-area-inset-top); margin-top: 10px; flex-shrink: 0; }
+
+    /* РОЗМИЙТТЯ ПІД ПАНЕЛЯМИ SAFARI */
+    .safari-blur-top {
+      position: fixed; top: 0; width: 100%; height: env(safe-area-inset-top);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      z-index: 100; background: rgba(0,0,0,0.2);
+    }
+    .safari-blur-bottom {
+      position: fixed; bottom: 0; width: 100%; height: env(safe-area-inset-bottom);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      z-index: 100; background: rgba(0,0,0,0.2);
+    }
+
+    .header { text-align: center; padding-top: env(safe-area-inset-top); margin-top: 15px; flex-shrink: 0; z-index: 101; }
     .header h1 { margin: 0; font-size: 18px; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.9); }
 
-    .dots { display: flex; justify-content: center; gap: 8px; margin: 8px 0 10px 0; flex-shrink: 0; }
+    .dots { display: flex; justify-content: center; gap: 8px; margin: 10px 0 15px 0; flex-shrink: 0; z-index: 101; }
     .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
     .dot.active { background: var(--accent-blue); transform: scale(1.4); }
 
     .swiper-container { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     .swiper-container::-webkit-scrollbar { display: none; }
-    .page { min-width: 100vw; max-width: 100vw; scroll-snap-align: start; box-sizing: border-box; padding: 0 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; display: block; }
-    .page-content { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+    .page { min-width: 100vw; max-width: 100vw; scroll-snap-align: start; box-sizing: border-box; padding: 0 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .page-content { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
 
     .glass { background: var(--glass); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 18px; margin-bottom: 12px; box-sizing: border-box; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); }
 
-    /* Статистика */
     .stats-grid { display: flex; justify-content: space-between; gap: 5px; }
     .stat-card { text-align: center; flex: 1; min-width: 0; }
     .stat-card .label { font-size: 18px; color: rgba(255,255,255,0.4); margin-bottom: 4px; display: block; }
     .stat-card .val { font-size: 20px; font-weight: 600; }
+    
     .stat-row-net { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 12px; padding-top: 12px; }
     .net-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .net-main .label { font-size: 20px; color: white; }
@@ -49,59 +65,53 @@
     .stat-tips .label { font-size: 18px; }
     .stat-tips .val { font-size: 22px; font-weight: 600; }
 
-    .chart-container { height: 120px; margin-top: 5px; }
+    .chart-container { height: 130px; margin-top: 5px; }
 
-    /* ЗМЕНШЕНИЙ БЛОК ВВОДУ */
-    .compact-form { padding: 14px !important; }
-    .compact-form .input-row { margin-bottom: 8px; }
-    .compact-form input, .compact-form .select-trigger { padding: 12px !important; margin-bottom: 8px !important; border-radius: 14px !important; font-size: 15px !important; }
-    .compact-form .btn { padding: 14px !important; margin-top: 4px; }
+    .input-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .input-row input { flex: 1; margin-bottom: 0 !important; }
 
-    .input-row { display: flex; gap: 10px; }
-    .input-row input { flex: 1; }
-
-    input[type="number"], input[type="text"], .btn { width: 100%; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.03); color: white; box-sizing: border-box; outline: none; }
+    input[type="number"], input[type="text"], .btn { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 16px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.03); color: white; font-size: 16px; box-sizing: border-box; outline: none; }
     .btn { border: none; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.3s; background: var(--btn-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
     .btn:active { transform: scale(0.96); }
 
-    /* Архів */
-    .archive-item { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 20px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .arc-info span { display: block; }
-    .arc-month { font-size: 16px; font-weight: 600; }
-    .arc-details { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
-    .arc-net { font-size: 18px; font-weight: 700; }
-
-    /* Історія */
     .history-item { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); align-items: center; }
     .h-info { display: flex; flex-direction: column; flex: 1; }
     .h-date { font-size: 10px; color: rgba(255,255,255,0.3); }
     .h-comm { font-size: 14px; color: #eee; }
     .h-actions { display: flex; align-items: center; gap: 8px; }
-    .h-amount { font-weight: 600; font-size: 14px; text-align: right; white-space: nowrap; }
-    .btn-icon { background: var(--btn-glass); border: 1px solid var(--glass-border); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
-    .icon-svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+    .h-amount { font-weight: 600; font-size: 14px; margin-right: 5px; text-align: right; white-space: nowrap; }
+    .btn-icon { background: var(--btn-glass); border: 1px solid var(--glass-border); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; backdrop-filter: blur(10px); }
+    .icon-svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; }
 
-    .custom-select { position: relative; width: 100%; }
-    .select-trigger { border-radius: 16px; background: var(--btn-glass); border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .select-options { position: absolute; top: 100%; left: 0; right: 0; background: rgba(20,20,20,0.95); backdrop-filter: blur(40px); border-radius: 18px; border: 1px solid var(--glass-border); display: none; z-index: 100; margin-top: 5px; overflow: hidden; }
+    .archive-item { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); }
+    .arc-month { font-size: 16px; font-weight: 600; display: block; }
+    .arc-details { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; display: block; }
+    .arc-net { font-size: 20px; font-weight: 700; }
+
+    .custom-select { position: relative; width: 100%; margin-bottom: 12px; }
+    .select-trigger { padding: 14px; border-radius: 16px; background: var(--btn-glass); border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; backdrop-filter: blur(20px); }
+    .select-options { position: absolute; top: 100%; left: 0; right: 0; background: rgba(20,20,20,0.9); backdrop-filter: blur(40px); border-radius: 18px; border: 1px solid var(--glass-border); display: none; z-index: 100; margin-top: 8px; overflow: hidden; }
     .select-options.show { display: block; }
-    .select-option { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .select-option { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
     #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: rgba(0,0,0,0.7); backdrop-filter: blur(25px); display: none; justify-content: center; align-items: center; z-index: 2000; }
   </style>
 </head>
 <body>
 
-  <div class="liquid-bg"><div class="blob"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+  <div class="safari-blur-top"></div>
+  <div class="safari-blur-bottom"></div>
+
+  <div class="liquid-bg"><div class="blob"></div><div class="blob blob-2"></div></div>
   <div class="header"><h1>Wella Nails</h1></div>
   <div class="dots"><div id="dot1" class="dot active"></div><div id="dot2" class="dot"></div><div id="dot3" class="dot"></div></div>
 
   <!-- MODAL EDIT -->
   <div id="editModal">
-    <div class="glass compact-form" style="width: 92%;">
-      <h3 style="margin-top:0; font-weight: 300; font-size: 16px;">РЕДАГУВАТИ</h3>
+    <div class="glass" style="width: 92%;">
+      <h3 style="margin-top:0; font-weight: 300;">РЕДАГУВАТИ</h3>
       <input type="hidden" id="editRow">
-      <div class="custom-select" style="margin-bottom:8px">
+      <div class="custom-select">
         <div class="select-trigger" onclick="toggleEditDropdown()"><span id="selectedEditTypeText">💰 Прибуток</span><span>▼</span></div>
         <div id="editSelectOptions" class="select-options">
           <div class="select-option" onclick="selectEditType('Прибуток', '💰 Прибуток')">💰 Прибуток</div>
@@ -112,12 +122,11 @@
       <div class="input-row"><input type="number" id="editAmount" placeholder="Сума"><input type="number" id="editTip" placeholder="Чай"></div>
       <input type="number" id="editClients" placeholder="Кількість клієнтів">
       <input type="text" id="editComment" placeholder="Коментар">
-      <div style="display:flex; gap:10px;"><button class="btn btn-inc" id="edit-save-btn" onclick="saveEdit()">Зберегти</button><button class="btn" style="background:rgba(255,255,255,0.05)" onclick="closeEdit()">Скасувати</button></div>
+      <div style="display:flex; gap:10px;"><button class="btn" style="background:var(--accent-green)" id="edit-save-btn" onclick="saveEdit()">Зберегти</button><button class="btn" style="background:rgba(255,255,255,0.05)" onclick="closeEdit()">Скасувати</button></div>
     </div>
   </div>
 
   <div class="swiper-container" id="swiper">
-    <!-- PAGE 1: DASHBOARD -->
     <div class="page">
       <div class="page-content">
         <div class="glass">
@@ -133,10 +142,8 @@
           </div>
         </div>
         <div class="glass" style="padding: 10px;"><div class="chart-container"><canvas id="lineChart"></canvas></div></div>
-        
-        <!-- COMPACT INPUT BLOCK -->
-        <div class="glass compact-form">
-          <div class="custom-select" style="margin-bottom:8px">
+        <div class="glass">
+          <div class="custom-select">
             <div class="select-trigger" onclick="toggleDropdown()"><span id="selectedTypeText">💰 Прибуток</span><span>▼</span></div>
             <div id="selectOptions" class="select-options">
               <div class="select-option" onclick="selectType('Прибуток', '💰 Прибуток')">💰 Прибуток</div>
@@ -144,36 +151,19 @@
             </div>
           </div>
           <div class="input-row"><input type="number" id="amount" placeholder="Сума (₴)" inputmode="decimal"><input type="number" id="tip" placeholder="Чай (₴)" inputmode="decimal"></div>
-          <input type="number" id="clients" placeholder="Кількість клієнтів" inputmode="numeric">
-          <input type="text" id="comment" placeholder="Коментар">
-          <button class="btn btn-inc" id="submit-btn" onclick="sendData()">Зберегти прибуток</button>
+          <input type="number" id="clients" placeholder="Кількість клієнтів" inputmode="numeric"><input type="text" id="comment" placeholder="Коментар">
+          <button class="btn" style="background:var(--accent-green)" id="submit-btn" onclick="sendData()">Зберегти прибуток</button>
         </div>
       </div>
     </div>
+    
+    <div class="page"><div class="page-content"><div class="glass"><h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">ОСТАННІ ОПЕРАЦІЇ</h3><div id="history-list"></div></div></div></div>
 
-    <!-- PAGE 2: HISTORY -->
-    <div class="page">
-      <div class="page-content">
-        <div class="glass">
-          <h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">ОСТАННІ ОПЕРАЦІЇ</h3>
-          <div id="history-list"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE 3: ARCHIVE -->
-    <div class="page">
-      <div class="page-content">
-        <div class="glass">
-          <h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">АРХІВ МІСЯЦІВ</h3>
-          <div id="archive-list"></div>
-        </div>
-      </div>
-    </div>
+    <div class="page"><div class="page-content"><div class="glass"><h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">АРХІВ МІСЯЦІВ</h3><div id="archive-list"></div></div></div></div>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFQt7DwT6ywwhZsC6EIJSIGTyEyXBIVAr8GX70tRMkpce796kRQKSfXbWQz-mOUP_7/exec"; // ВСТАВТЕ СЮДИ URL!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFQt7DwT6ywwhZsC6EIJSIGTyEyXBIVAr8GX70tRMkpce796kRQKSfXbWQz-mOUP_7/exec";
 
     var myChart, lastData;
     const swiper = document.getElementById('swiper');
@@ -194,22 +184,43 @@
       setTimeout(loadData, 1500);
     }
 
+    function clearForm() {
+      document.getElementById('amount').value = ''; document.getElementById('tip').value = ''; 
+      document.getElementById('comment').value = ''; document.getElementById('clients').value = '';
+      const btn = document.getElementById('submit-btn'); btn.disabled = false;
+      btn.innerText = document.getElementById('type').value === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
+    }
+
+    function initChart(chartData) {
+      const ctx = document.getElementById('lineChart').getContext('2d');
+      if (myChart) myChart.destroy();
+      myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            { label: 'Дохід', data: chartData.inc, borderColor: '#34c759', tension: 0.4, pointRadius: 2, fill: false },
+            { label: 'Витрати', data: chartData.exp, borderColor: '#ff3b30', tension: 0.4, pointRadius: 2, fill: false }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.3)', font: {size: 9} }, grid: { display: false } }, y: { display: false } } }
+      });
+    }
+
     function updateUI(res) {
       if (!res || typeof res === 'string') return;
       lastData = res;
-      const m = res.month;
-      document.getElementById('m-inc').innerText = m.income;
-      document.getElementById('m-exp').innerText = m.expense;
-      document.getElementById('m-roi').innerText = m.roi + '%';
-      document.getElementById('m-cli').innerText = m.clients;
-      document.getElementById('m-tips').innerText = m.tips + ' ₴';
+      document.getElementById('m-inc').innerText = res.month.income;
+      document.getElementById('m-exp').innerText = res.month.expense;
+      document.getElementById('m-roi').innerText = res.month.roi + '%';
+      document.getElementById('m-cli').innerText = res.month.clients;
+      document.getElementById('m-tips').innerText = res.month.tips + ' ₴';
       const netEl = document.getElementById('m-net');
-      netEl.innerText = m.net + ' ₴';
-      netEl.style.color = m.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+      netEl.innerText = res.month.net + ' ₴';
+      netEl.style.color = res.month.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
       
       initChart(res.chart);
       
-      // Рендеримо історію
       document.getElementById('history-list').innerHTML = res.history.map(item => `
         <div class="history-item">
           <div class="h-info"><span class="h-date">${item.date}</span><span class="h-comm">${item.comment || item.type}</span></div>
@@ -222,21 +233,52 @@
           </div>
         </div>`).join('');
 
-      // Рендеримо архів
       document.getElementById('archive-list').innerHTML = res.archive.map(arc => `
         <div class="archive-item">
-          <div class="arc-info">
-            <span class="arc-month">${arc.label}</span>
-            <span class="arc-details">Дохід: ${arc.income} | Клієнти: ${arc.clients}</span>
-          </div>
-          <div class="arc-net" style="color:${arc.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">
-            ${arc.net} ₴
-          </div>
+          <div class="arc-info"><span class="arc-month">${arc.label}</span><span class="arc-details">Дохід: ${arc.income} | Клієнти: ${arc.clients}</span></div>
+          <div class="arc-net" style="color:${arc.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${arc.net} ₴</div>
         </div>`).join('');
     }
 
-    // Решта функцій (Dropdown, swiper dots, initChart, sendData, etc.) залишаються майже без змін
-    // Тільки додайте 3-тю точку в swiper listener:
+    function sendData() {
+      const amount = document.getElementById('amount').value; if (!amount) return;
+      const btn = document.getElementById('submit-btn'); btn.disabled = true; btn.innerText = 'Записую...';
+      sendToAPI({ action: 'add', type: document.getElementById('type').value, amount: amount, tip: document.getElementById('tip').value || 0, clients: document.getElementById('clients').value || 0, comment: document.getElementById('comment').value || "" }).then(clearForm);
+    }
+
+    function deleteItem(row) { if (confirm("Видалити?")) sendToAPI({ action: 'delete', row: row }); }
+
+    function openEdit(row) {
+      const item = lastData.history.find(h => h.row === row); if (!item) return;
+      document.getElementById('editRow').value = row;
+      selectEditType(item.type, item.type === 'Прибуток' ? '💰 Прибуток' : '💸 Витрата');
+      document.getElementById('editAmount').value = item.amount;
+      document.getElementById('editTip').value = item.tip;
+      document.getElementById('editClients').value = item.clients;
+      document.getElementById('editComment').value = item.comment;
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function saveEdit() {
+      const btn = document.getElementById('edit-save-btn'); btn.disabled = true;
+      sendToAPI({ action: 'update', row: document.getElementById('editRow').value, type: document.getElementById('editTypeVal').value, amount: document.getElementById('editAmount').value, tip: document.getElementById('editTip').value || 0, clients: document.getElementById('editClients').value || 0, comment: document.getElementById('editComment').value || "" }).then(() => { closeEdit(); btn.disabled = false; });
+    }
+
+    function toggleDropdown() { document.getElementById('selectOptions').classList.toggle('show'); }
+    function toggleEditDropdown() { document.getElementById('editSelectOptions').classList.toggle('show'); }
+    function selectType(val, text) {
+      document.getElementById('type').value = val; document.getElementById('selectedTypeText').innerText = text; document.getElementById('selectOptions').classList.remove('show');
+      const btn = document.getElementById('submit-btn'); btn.innerText = val === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
+      document.getElementById('clients').style.display = val === 'Витрата' ? 'none' : 'block';
+      document.getElementById('tip').style.display = val === 'Витрата' ? 'none' : 'block';
+    }
+    function selectEditType(val, text) {
+      document.getElementById('editTypeVal').value = val; document.getElementById('selectedEditTypeText').innerText = text; document.getElementById('editSelectOptions').classList.remove('show');
+      document.getElementById('editClients').style.display = val === 'Витрата' ? 'none' : 'block';
+      document.getElementById('editTip').style.display = val === 'Витрата' ? 'none' : 'block';
+    }
+    function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
+
     swiper.addEventListener('scroll', () => {
       const index = Math.round(swiper.scrollLeft / window.innerWidth);
       document.getElementById('dot1').classList.toggle('active', index === 0);
@@ -244,10 +286,9 @@
       document.getElementById('dot3').classList.toggle('active', index === 2);
     });
 
-    // ... (Всі інші функції з попереднього коду) ...
-    // Не забудьте скопіювати clearForm, toggleDropdown, selectType, initChart, sendData, deleteItem, openEdit, saveEdit з попередньої версії.
-    
+    window.onclick = function(e) { if (!e.target.closest('.custom-select')) { document.getElementById('selectOptions').classList.remove('show'); document.getElementById('editSelectOptions').classList.remove('show'); } }
     window.onload = loadData;
   </script>
+  <input type="hidden" id="type" value="Прибуток">
 </body>
 </html>
