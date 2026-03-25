@@ -379,6 +379,34 @@
         btn.disabled = false;
       });
     }
+    async function callAPI(payload = null) {
+    try {
+      if (!payload) {
+        // Завантаження даних
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        updateUI(data);
+      } else {
+        // Відправка даних
+        // ВАЖЛИВО: Не ставимо заголовки Headers!
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Для Apps Script це безпечно при відправці
+          body: JSON.stringify(payload)
+        });
+
+        // Оскільки 'no-cors' не дає прочитати відповідь, 
+        // робимо маленьку паузу і завантажуємо оновлені дані через GET
+        setTimeout(async () => {
+          const res = await fetch(SCRIPT_URL);
+          const data = await res.json();
+          updateUI(data);
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("API Error:", err);
+    }
+  }
 
     function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
 
