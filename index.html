@@ -53,7 +53,7 @@
 
     .glass { background: var(--glass); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 18px; margin-bottom: 12px; box-sizing: border-box; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); }
 
-    /* СТАТИСТИКА */
+    /* СТАТИСТИКА ГОЛОВНА */
     .stats-grid { display: flex; justify-content: space-between; gap: 5px; }
     .stat-card { text-align: center; flex: 1; min-width: 0; }
     .stat-card .label { font-size: 18px; color: rgba(255,255,255,0.4); margin-bottom: 4px; display: block; }
@@ -88,16 +88,20 @@
     .icon-edit { color: var(--accent-blue); }
     .icon-delete { color: var(--accent-red); }
 
-    /* АРХІВ */
+    /* АРХІВ МІСЯЦІВ */
     .archive-card { margin-bottom: 12px; }
-    .arc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .arc-month { font-size: 20px; font-weight: 700; color: white; }
-    .arc-net { font-size: 22px; font-weight: 700; }
-    .arc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; }
+    .arc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+    .arc-month { font-size: 20px; font-weight: 700; color: white; margin-top: 2px; }
+    
+    /* Правий блок з профітом та ROI */
+    .arc-result { text-align: right; }
+    .arc-net { font-size: 22px; font-weight: 700; display: block; line-height: 1; }
+    .arc-roi-sub { font-size: 12px; color: var(--accent-blue); font-weight: 600; margin-top: 4px; display: block; opacity: 0.8; }
+
+    .arc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; }
     .arc-stat { text-align: center; }
     .arc-stat .label { font-size: 14px; color: rgba(255,255,255,0.4); display: block; margin-bottom: 2px; }
     .arc-stat .val { font-size: 16px; font-weight: 600; }
-    .arc-roi { font-size: 12px; color: var(--accent-blue); font-weight: 600; margin-top: 5px; text-align: right; width: 100%; }
 
     #success-toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 1000; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: rgba(52, 199, 89, 0.2); backdrop-filter: blur(20px); border: 1px solid var(--accent-green); padding: 12px 24px; border-radius: 20px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     #success-toast.show { top: calc(20px + env(safe-area-inset-top)); }
@@ -123,7 +127,6 @@
 
   <div class="safari-blur-bottom"></div>
 
-  <!-- MODAL EDIT -->
   <div id="editModal">
     <div class="glass" style="width: 92%;">
       <h3 style="margin:0 0 15px 0; font-weight: 300;">РЕДАГУВАТИ</h3>
@@ -144,7 +147,6 @@
   </div>
 
   <div class="swiper-container" id="swiper">
-    <!-- PAGE 1: DASHBOARD -->
     <div class="page">
       <div class="page-content">
         <div class="glass">
@@ -174,11 +176,7 @@
         </div>
       </div>
     </div>
-    
-    <!-- PAGE 2: HISTORY -->
     <div class="page"><div class="page-content"><div class="glass"><h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">ОСТАННІ ОПЕРАЦІЇ</h3><div id="history-list"></div></div></div></div>
-
-    <!-- PAGE 3: ARCHIVE -->
     <div class="page"><div class="page-content" id="archive-list"></div></div>
   </div>
 
@@ -193,7 +191,6 @@
     function loadData() {
       const cached = localStorage.getItem('wella_cache');
       if (cached) updateUI(JSON.parse(cached));
-      
       const script = document.createElement('script');
       script.src = `${SCRIPT_URL}?prefix=handleResponse&v=${new Date().getTime()}`;
       document.body.appendChild(script);
@@ -208,13 +205,8 @@
     function updateOptimistic(payload) {
       if (!lastData) return;
       const amount = parseFloat(payload.amount);
-      if (payload.type === "Прибуток") { 
-        lastData.month.income += amount; 
-        lastData.month.tips += parseFloat(payload.tip || 0); 
-        lastData.month.clients += parseInt(payload.clients || 0); 
-      } else { 
-        lastData.month.expense += amount; 
-      }
+      if (payload.type === "Прибуток") { lastData.month.income += amount; lastData.month.tips += parseFloat(payload.tip || 0); lastData.month.clients += parseInt(payload.clients || 0); }
+      else { lastData.month.expense += amount; }
       lastData.month.net = lastData.month.income - lastData.month.expense;
       lastData.history.unshift({ row: -1, date: "Зараз", type: payload.type, amount, tip: payload.tip||0, comment: payload.comment || "Запис..." });
       updateUI(lastData);
@@ -259,17 +251,19 @@
           </div>
         </div>`).join('');
 
-      document.getElementById('archive-list').innerHTML = `<h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px; padding:0 5px;">АРХІВ МІСЯЦІВ</h3>` + res.archive.map(arc => `
+      document.getElementById('archive-list').innerHTML = `<h3 style="margin:0 0 15px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px; padding:0 5px;">АРХІВ МІСЯЦІВ</h3>` + res.archive.map(arc => `
         <div class="glass archive-card">
           <div class="arc-header">
             <span class="arc-month">${arc.label}</span>
-            <span class="arc-net" style="color:${arc.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${arc.net} ₴</span>
-            <div class="arc-roi">ROI: ${arc.roi}%</div>
+            <div class="arc-result">
+              <span class="arc-net" style="color:${arc.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${arc.net} ₴</span>
+              <span class="arc-roi">ROI: ${arc.roi}%</span>
+            </div>
           </div>
           <div class="arc-grid">
             <div class="arc-stat"><span class="label" style="font-size:10px">Дохід</span><span class="val" style="font-size:14px">${arc.income}</span></div>
             <div class="arc-stat"><span class="label" style="font-size:10px">Витрати</span><span class="val" style="font-size:14px">${arc.expense}</span></div>
-            <div class="arc-stat"><span class="label" style="font-size:10px">Клієнти</span><span class="val" style="font-size:14px">${arc.clients}</span></div>
+            <div class="arc-stat" style="text-align:right"><span class="label" style="font-size:10px">Клієнти</span><span class="val" style="font-size:14px">${arc.clients}</span></div>
           </div>
         </div>`).join('');
     }
