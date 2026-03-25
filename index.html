@@ -21,6 +21,8 @@
     }
 
     html, body { margin: 0; padding: 0; width: 100%; height: 100dvh; background: #000; overflow: hidden; color: white; font-family: -apple-system, system-ui, sans-serif; }
+    
+    /* ФОН РІДКОГО СКЛА */
     .liquid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #000; overflow: hidden; }
     .blob { position: absolute; width: 300px; height: 300px; background: var(--accent-blue); filter: blur(80px); border-radius: 50%; opacity: 0.3; animation: move 20s infinite alternate; }
     .blob-2 { background: #8e44ad; width: 400px; height: 400px; right: -100px; top: 10%; animation-duration: 25s; opacity: 0.2; }
@@ -28,23 +30,44 @@
 
     body { display: flex; flex-direction: column; background: transparent; }
 
-    .safari-blur-top { position: fixed; top: 0; width: 100%; height: env(safe-area-inset-top); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 100; background: rgba(0,0,0,0.2); }
-    .safari-blur-bottom { position: fixed; bottom: 0; width: 100%; height: env(safe-area-inset-bottom); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 100; background: rgba(0,0,0,0.2); }
+    /* ФІКСОВАНИЙ ХЕДЕР З РОЗМИТТЯМ (APPLE STYLE) */
+    .top-ui {
+      position: fixed; top: 0; left: 0; width: 100%;
+      z-index: 100;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: 10px;
+    }
 
-    .header { text-align: center; padding-top: env(safe-area-inset-top); margin-top: 15px; flex-shrink: 0; z-index: 101; }
+    .header { text-align: center; margin-top: 15px; }
     .header h1 { margin: 0; font-size: 18px; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.9); }
 
-    .dots { display: flex; justify-content: center; gap: 8px; margin: 10px 0 15px 0; flex-shrink: 0; z-index: 101; }
+    .dots { display: flex; justify-content: center; gap: 8px; margin: 10px 0 5px 0; }
     .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
     .dot.active { background: var(--accent-blue); transform: scale(1.4); }
 
+    /* ФІКСОВАНИЙ НИЗ SAFARI */
+    .safari-blur-bottom { position: fixed; bottom: 0; width: 100%; height: env(safe-area-inset-bottom); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 100; background: rgba(0,0,0,0.2); }
+
     .swiper-container { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     .swiper-container::-webkit-scrollbar { display: none; }
-    .page { min-width: 100vw; max-width: 100vw; scroll-snap-align: start; box-sizing: border-box; padding: 0 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .page-content { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+
+    .page { 
+      min-width: 100vw; max-width: 100vw; scroll-snap-align: start; box-sizing: border-box; 
+      padding: 0 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+    }
+
+    /* Відступ зверху, щоб контент не ховався під фіксованим хедером на старті */
+    .page-content { 
+      padding-top: calc(85px + env(safe-area-inset-top)); 
+      padding-bottom: calc(40px + env(safe-area-inset-bottom)); 
+    }
 
     .glass { background: var(--glass); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 18px; margin-bottom: 12px; box-sizing: border-box; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); }
 
+    /* Статистика */
     .stats-grid { display: flex; justify-content: space-between; gap: 5px; }
     .stat-card { text-align: center; flex: 1; min-width: 0; }
     .stat-card .label { font-size: 18px; color: rgba(255,255,255,0.4); margin-bottom: 4px; display: block; }
@@ -73,10 +96,12 @@
     .h-comm { font-size: 14px; color: #eee; }
     .h-actions { display: flex; align-items: center; gap: 8px; }
     .h-amount { font-weight: 600; font-size: 14px; margin-right: 5px; text-align: right; white-space: nowrap; }
+
     .btn-icon { background: var(--btn-glass); border: 1px solid var(--glass-border); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; backdrop-filter: blur(10px); }
     .icon-svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+    .icon-edit { color: var(--accent-blue); }
+    .icon-delete { color: var(--accent-red); }
 
-    /* АРХІВ: ОНОВЛЕНИЙ ДИЗАЙН */
     .archive-item { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 24px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; backdrop-filter: blur(10px); }
     .arc-month { font-size: 18px; font-weight: 600; display: block; margin-bottom: 4px; }
     .arc-details { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.5; display: block; }
@@ -95,16 +120,23 @@
 </head>
 <body>
 
-  <div class="safari-blur-top"></div>
+  <!-- БЛОК РОЗМИТТЯ ТА ХЕДЕРА -->
+  <div class="top-ui">
+    <div class="header"><h1>Wella Nails</h1></div>
+    <div class="dots">
+      <div id="dot1" class="dot active"></div>
+      <div id="dot2" class="dot"></div>
+      <div id="dot3" class="dot"></div>
+    </div>
+  </div>
+
   <div class="safari-blur-bottom"></div>
   <div class="liquid-bg"><div class="blob"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 
-  <div class="header"><h1>Wella Nails</h1></div>
-  <div class="dots"><div id="dot1" class="dot active"></div><div id="dot2" class="dot"></div><div id="dot3" class="dot"></div></div>
-
+  <!-- MODAL EDIT -->
   <div id="editModal">
     <div class="glass" style="width: 92%;">
-      <h3 style="margin-top:0; font-weight: 300;">РЕДАГУВАТИ</h3>
+      <h3 style="margin:0 0 15px 0; font-weight: 300;">РЕДАГУВАТИ</h3>
       <input type="hidden" id="editRow">
       <div class="custom-select">
         <div class="select-trigger" onclick="toggleEditDropdown()"><span id="selectedEditTypeText">💰 Прибуток</span><span>▼</span></div>
@@ -122,6 +154,7 @@
   </div>
 
   <div class="swiper-container" id="swiper">
+    <!-- PAGE 1 -->
     <div class="page">
       <div class="page-content">
         <div class="glass">
@@ -152,200 +185,137 @@
       </div>
     </div>
     
+    <!-- PAGE 2 -->
     <div class="page"><div class="page-content"><div class="glass"><h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">ОСТАННІ ОПЕРАЦІЇ</h3><div id="history-list"></div></div></div></div>
 
+    <!-- PAGE 3 -->
     <div class="page"><div class="page-content"><div class="glass"><h3 style="margin:0 0 10px 0; font-weight:300; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">АРХІВ МІСЯЦІВ</h3><div id="archive-list"></div></div></div></div>
   </div>
 
   <script>
-  // 1. ПЕРЕВІРТЕ, ЩО ЦЕ ПОСИЛАННЯ ЗАКІНЧУЄТЬСЯ НА /exec
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFQt7DwT6ywwhZsC6EIJSIGTyEyXBIVAr8GX70tRMkpce796kRQKSfXbWQz-mOUP_7/exec"; 
+    // --- ПІДКЛЮЧЕННЯ (ВСТАВТЕ ВАШ URL) ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFQt7DwT6ywwhZsC6EIJSIGTyEyXBIVAr8GX70tRMkpce796kRQKSfXbWQz-mOUP_7/exec";
 
-  var myChart, lastData;
-  const swiper = document.getElementById('swiper');
-  const iconEdit = `<svg class="icon-svg icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-  const iconDelete = `<svg class="icon-svg icon-delete" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+    var myChart, lastData;
+    const swiper = document.getElementById('swiper');
+    const iconEdit = `<svg class="icon-svg icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+    const iconDelete = `<svg class="icon-svg icon-delete" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
 
-  // Створюємо елемент для статусу (щоб бачити помилки на телефоні)
-  const statusEl = document.createElement('div');
-  statusEl.style = "position:fixed; bottom:5px; left:5px; font-size:8px; opacity:0.3; z-index:1000;";
-  document.body.appendChild(statusEl);
-
-  function logStatus(msg) { statusEl.innerText = msg; console.log(msg); }
-
-  // ФУНКЦІЯ ЗАВАНТАЖЕННЯ (JSONP)
-  function loadData() {
-    logStatus("Завантаження даних...");
-    const callbackName = 'jsonp_callback_' + Math.round(Math.random() * 1000000);
-    
-    window[callbackName] = function(data) {
-      logStatus("Дані отримано успішно");
-      updateUI(data);
-      delete window[callbackName];
-    };
-
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?prefix=${callbackName}&v=${new Date().getTime()}`;
-    script.onerror = () => logStatus("Помилка завантаження скрипта. Перевірте Deploy!");
-    document.body.appendChild(script);
-  }
-
-  // ОБРОБКА ДАНИХ (Для сумісності з минулим Код.gs)
-  window.handleResponse = function(data) {
-    logStatus("Дані отримано (handleResponse)");
-    updateUI(data);
-  };
-
-  async function sendToAPI(payload) {
-    logStatus("Відправка...");
-    try {
-      await fetch(SCRIPT_URL, { 
-        method: 'POST', 
-        mode: 'no-cors', 
-        body: JSON.stringify(payload) 
-      });
-      logStatus("Відправлено. Оновлення...");
-      setTimeout(loadData, 2000);
-    } catch (e) {
-      logStatus("Помилка POST: " + e.message);
+    function loadData() {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?prefix=handleResponse&v=${new Date().getTime()}`;
+      document.body.appendChild(script);
     }
-  }
 
-  // --- ВІЗУАЛІЗАЦІЯ ---
-  function updateUI(res) {
-    if (!res || typeof res !== 'object') return;
-    lastData = res;
-    
-    document.getElementById('m-inc').innerText = res.month.income;
-    document.getElementById('m-exp').innerText = res.month.expense;
-    document.getElementById('m-roi').innerText = res.month.roi + '%';
-    document.getElementById('m-cli').innerText = res.month.clients;
-    document.getElementById('m-tips').innerText = res.month.tips + ' ₴';
-    
-    const netEl = document.getElementById('m-net');
-    netEl.innerText = res.month.net + ' ₴';
-    netEl.style.color = res.month.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
-    
-    initChart(res.chart);
-    
-    document.getElementById('history-list').innerHTML = res.history.map(item => `
-      <div class="history-item">
-        <div class="h-info"><span class="h-date">${item.date}</span><span class="h-comm">${item.comment || item.type}</span></div>
-        <div class="h-actions">
-          <div class="h-amount" style="color:${item.type==='Прибуток'?'var(--accent-green)':'var(--accent-red)'}">
-            ${item.type==='Прибуток' ? item.amount + ' ₴ + ' + item.tip + ' ₴' : '- ' + item.amount + ' ₴'}
+    window.handleResponse = function(data) { updateUI(data); };
+
+    async function sendToAPI(payload) {
+      try {
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+        setTimeout(loadData, 1500);
+      } catch (e) { console.error(e); }
+    }
+
+    function updateUI(res) {
+      if (!res || typeof res === 'string') return;
+      lastData = res;
+      document.getElementById('m-inc').innerText = res.month.income;
+      document.getElementById('m-exp').innerText = res.month.expense;
+      document.getElementById('m-roi').innerText = res.month.roi + '%';
+      document.getElementById('m-cli').innerText = res.month.clients;
+      document.getElementById('m-tips').innerText = res.month.tips + ' ₴';
+      const netEl = document.getElementById('m-net');
+      netEl.innerText = res.month.net + ' ₴';
+      netEl.style.color = res.month.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+      initChart(res.chart);
+      
+      document.getElementById('history-list').innerHTML = res.history.map(item => `
+        <div class="history-item">
+          <div class="h-info"><span class="h-date">${item.date}</span><span class="h-comm">${item.comment || item.type}</span></div>
+          <div class="h-actions">
+            <div class="h-amount" style="color:${item.type==='Прибуток'?'var(--accent-green)':'var(--accent-red)'}">
+              ${item.type==='Прибуток' ? item.amount + ' ₴ + ' + item.tip + ' ₴' : '- ' + item.amount + ' ₴'}
+            </div>
+            <button class="btn-icon" onclick="openEdit(${item.row})">${iconEdit}</button>
+            <button class="btn-icon" onclick="deleteItem(${item.row})">${iconDelete}</button>
           </div>
-          <button class="btn-icon" onclick="openEdit(${item.row})">${iconEdit}</button>
-          <button class="btn-icon" onclick="deleteItem(${item.row})">${iconDelete}</button>
-        </div>
-      </div>`).join('');
+        </div>`).join('');
 
-    document.getElementById('archive-list').innerHTML = res.archive.map(arc => `
-      <div class="archive-item">
-        <div class="arc-info"><span class="arc-month">${arc.label}</span><span class="arc-details">Дохід: ${arc.income} ₴<br>Витрати: ${arc.expense} ₴ | Кл: ${arc.clients}</span></div>
-        <div class="arc-right">
-          <div class="arc-net" style="color:${arc.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${arc.net} ₴</div>
-          <div class="arc-roi">ROI: ${arc.roi}%</div>
-        </div>
-      </div>`).join('');
-  }
+      document.getElementById('archive-list').innerHTML = res.archive.map(arc => `
+        <div class="archive-item">
+          <div class="arc-info"><span class="arc-month">${arc.label}</span><span class="arc-details">Дохід: ${arc.income} ₴<br>Витрати: ${arc.expense} ₴ | Клієнти: ${arc.clients}</span></div>
+          <div class="arc-right"><div class="arc-net" style="color:${arc.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${arc.net} ₴</div><div class="arc-roi">ROI: ${arc.roi}%</div></div>
+        </div>`).join('');
+    }
 
-  function initChart(chartData) {
-    const ctx = document.getElementById('lineChart').getContext('2d');
-    if (myChart) myChart.destroy();
-    myChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: chartData.labels,
-        datasets: [
-          { label: 'Дохід', data: chartData.inc, borderColor: '#34c759', tension: 0.4, pointRadius: 2, fill: false },
-          { label: 'Витрати', data: chartData.exp, borderColor: '#ff3b30', tension: 0.4, pointRadius: 2, fill: false }
-        ]
-      },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.3)', font: {size: 9} }, grid: { display: false } }, y: { display: false } } }
+    function initChart(chartData) {
+      const ctx = document.getElementById('lineChart').getContext('2d');
+      if (myChart) myChart.destroy();
+      myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            { label: 'Дохід', data: chartData.inc, borderColor: '#34c759', tension: 0.4, pointRadius: 2, fill: false },
+            { label: 'Витрати', data: chartData.exp, borderColor: '#ff3b30', tension: 0.4, pointRadius: 2, fill: false }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.3)', font: {size: 9} }, grid: { display: false } }, y: { display: false } } }
+      });
+    }
+
+    function sendData() {
+      const amount = document.getElementById('amount').value; if (!amount) return;
+      const btn = document.getElementById('submit-btn'); btn.disabled = true; btn.innerText = 'Записую...';
+      sendToAPI({ action: 'add', type: document.getElementById('type').value, amount: amount, tip: document.getElementById('tip').value || 0, clients: document.getElementById('clients').value || 0, comment: document.getElementById('comment').value || "" }).then(() => {
+        document.getElementById('amount').value = ''; document.getElementById('tip').value = ''; document.getElementById('comment').value = ''; document.getElementById('clients').value = '';
+        btn.disabled = false; btn.innerText = document.getElementById('type').value === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
+      });
+    }
+
+    function deleteItem(row) { if (confirm("Видалити?")) sendToAPI({ action: 'delete', row: row }); }
+
+    function openEdit(row) {
+      const item = lastData.history.find(h => h.row === row); if (!item) return;
+      document.getElementById('editRow').value = row;
+      selectEditType(item.type, item.type === 'Прибуток' ? '💰 Прибуток' : '💸 Витрата');
+      document.getElementById('editAmount').value = item.amount;
+      document.getElementById('editTip').value = item.tip;
+      document.getElementById('editClients').value = item.clients;
+      document.getElementById('editComment').value = item.comment;
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function saveEdit() {
+      const btn = document.getElementById('edit-save-btn'); btn.disabled = true;
+      sendToAPI({ action: 'update', row: document.getElementById('editRow').value, type: document.getElementById('editTypeVal').value, amount: document.getElementById('editAmount').value, tip: document.getElementById('editTip').value || 0, clients: document.getElementById('editClients').value || 0, comment: document.getElementById('editComment').value || "" }).then(() => { document.getElementById('editModal').style.display = 'none'; btn.disabled = false; });
+    }
+
+    function toggleDropdown() { document.getElementById('selectOptions').classList.toggle('show'); }
+    function toggleEditDropdown() { document.getElementById('editSelectOptions').classList.toggle('show'); }
+    function selectType(val, text) {
+      document.getElementById('type').value = val; document.getElementById('selectedTypeText').innerText = text; document.getElementById('selectOptions').classList.remove('show');
+      const btn = document.getElementById('submit-btn'); btn.innerText = val === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
+      document.getElementById('clients').style.display = val === 'Витрата' ? 'none' : 'block';
+      document.getElementById('tip').style.display = val === 'Витрата' ? 'none' : 'block';
+    }
+    function selectEditType(val, text) {
+      document.getElementById('editTypeVal').value = val; document.getElementById('selectedEditTypeText').innerText = text; document.getElementById('editSelectOptions').classList.remove('show');
+      document.getElementById('editClients').style.display = val === 'Витрата' ? 'none' : 'block';
+      document.getElementById('editTip').style.display = val === 'Витрата' ? 'none' : 'block';
+    }
+    function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
+
+    swiper.addEventListener('scroll', () => {
+      const index = Math.round(swiper.scrollLeft / window.innerWidth);
+      document.getElementById('dot1').classList.toggle('active', index === 0);
+      document.getElementById('dot2').classList.toggle('active', index === 1);
+      document.getElementById('dot3').classList.toggle('active', index === 2);
     });
-  }
 
-  function sendData() {
-    const amount = document.getElementById('amount').value;
-    if (!amount) return;
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true; btn.innerText = 'Записую...';
-    sendToAPI({ 
-      action: 'add', 
-      type: document.getElementById('type').value, 
-      amount: amount, 
-      tip: document.getElementById('tip').value || 0, 
-      clients: document.getElementById('clients').value || 0, 
-      comment: document.getElementById('comment').value || "" 
-    }).then(() => {
-      document.getElementById('amount').value = ''; document.getElementById('tip').value = ''; document.getElementById('comment').value = ''; document.getElementById('clients').value = '';
-      btn.disabled = false; btn.innerText = document.getElementById('type').value === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
-    });
-  }
-
-  function deleteItem(row) { if (confirm("Видалити запис?")) sendToAPI({ action: 'delete', row: row }); }
-
-  function openEdit(row) {
-    const item = lastData.history.find(h => h.row === row);
-    if (!item) return;
-    document.getElementById('editRow').value = row;
-    const typeText = item.type === 'Прибуток' ? '💰 Прибуток' : '💸 Витрата';
-    selectEditType(item.type, typeText);
-    document.getElementById('editAmount').value = item.amount;
-    document.getElementById('editTip').value = item.tip;
-    document.getElementById('editClients').value = item.clients;
-    document.getElementById('editComment').value = item.comment;
-    document.getElementById('editModal').style.display = 'flex';
-  }
-
-  function saveEdit() {
-    const btn = document.getElementById('edit-save-btn'); btn.disabled = true;
-    sendToAPI({ 
-      action: 'update', 
-      row: document.getElementById('editRow').value, 
-      type: document.getElementById('editTypeVal').value, 
-      amount: document.getElementById('editAmount').value, 
-      tip: document.getElementById('editTip').value || 0, 
-      clients: document.getElementById('editClients').value || 0, 
-      comment: document.getElementById('editComment').value || "" 
-    }).then(() => { document.getElementById('editModal').style.display = 'none'; btn.disabled = false; });
-  }
-
-  function toggleDropdown() { document.getElementById('selectOptions').classList.toggle('show'); }
-  function toggleEditDropdown() { document.getElementById('editSelectOptions').classList.toggle('show'); }
-  
-  function selectType(val, text) {
-    document.getElementById('type').value = val;
-    document.getElementById('selectedTypeText').innerText = text;
-    document.getElementById('selectOptions').classList.remove('show');
-    const btn = document.getElementById('submit-btn');
-    btn.innerText = val === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
-    document.getElementById('clients').style.display = val === 'Витрата' ? 'none' : 'block';
-    document.getElementById('tip').style.display = val === 'Витрата' ? 'none' : 'block';
-  }
-
-  function selectEditType(val, text) {
-    document.getElementById('editTypeVal').value = val;
-    document.getElementById('selectedEditTypeText').innerText = text;
-    document.getElementById('editSelectOptions').classList.remove('show');
-    document.getElementById('editClients').style.display = (val === 'Витрата') ? 'none' : 'block';
-    document.getElementById('editTip').style.display = (val === 'Витрата') ? 'none' : 'block';
-  }
-
-  function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
-
-  swiper.addEventListener('scroll', () => {
-    const index = Math.round(swiper.scrollLeft / window.innerWidth);
-    document.getElementById('dot1').classList.toggle('active', index === 0);
-    document.getElementById('dot2').classList.toggle('active', index === 1);
-    document.getElementById('dot3').classList.toggle('active', index === 2);
-  });
-
-  window.onclick = function(e) { if (!e.target.closest('.custom-select')) { document.getElementById('selectOptions').classList.remove('show'); document.getElementById('editSelectOptions').classList.remove('show'); } }
-
-  window.onload = loadData;
-</script>
+    window.onclick = function(e) { if (!e.target.closest('.custom-select')) { document.getElementById('selectOptions').classList.remove('show'); document.getElementById('editSelectOptions').classList.remove('show'); } }
+    window.onload = loadData;
+  </script>
   <input type="hidden" id="type" value="Прибуток">
 </body>
 </html>
