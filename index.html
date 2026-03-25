@@ -212,46 +212,39 @@
     </div>
   </div>
 
-  <script>
-  // 1. ВСТАВТЕ ВАШ НОВИЙ URL ПІСЛЯ "NEW DEPLOYMENT" ТУТ:
+ <script>
+  // 1. ВСТАВТЕ ВАШ НОВИЙ URL ПІСЛЯ "NEW DEPLOYMENT"
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFQt7DwT6ywwhZsC6EIJSIGTyEyXBIVAr8GX70tRMkpce796kRQKSfXbWQz-mOUP_7/exec";
 
   var myChart, lastData;
   const swiper = document.getElementById('swiper');
-  
-  // Векторні іконки
   const iconEdit = `<svg class="icon-svg icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
   const iconDelete = `<svg class="icon-svg icon-delete" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
 
-  // 2. ГОЛОВНА ФУНКЦІЯ ЗВ'ЯЗКУ (ФІКС CORS)
-  async function callAPI(payload = null) {
-    try {
-      if (!payload) {
-        // Отримання даних (GET)
-        const res = await fetch(SCRIPT_URL);
-        const data = await res.json();
-        updateUI(data);
-      } else {
-        // Відправка даних (POST)
-        // mode: 'no-cors' дозволяє обійти обмеження браузера
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors', 
-          body: JSON.stringify(payload)
-        });
+  // ФУНКЦІЯ ДЛЯ ОТРИМАННЯ ДАНИХ (JSONP - ОБХІД CORS)
+  function loadData() {
+    const script = document.createElement('script');
+    // Додаємо випадкове число, щоб уникнути кешування
+    script.src = `${SCRIPT_URL}?prefix=handleResponse&v=${Math.random()}`;
+    document.body.appendChild(script);
+    // Видаляємо скрипт після завантаження
+    script.onload = () => document.body.removeChild(script);
+  }
 
-        // Після POST ми не можемо прочитати відповідь через no-cors,
-        // тому через 1.5 сек робимо GET запит, щоб оновити екран
-        setTimeout(async () => {
-          const res = await fetch(SCRIPT_URL);
-          const data = await res.json();
-          updateUI(data);
-          clearForm();
-        }, 1500);
-      }
-    } catch (err) {
-      console.error("Помилка зв'язку:", err);
-    }
+  // Ця функція викликається автоматично, коли приходять дані від Google
+  function handleResponse(data) {
+    updateUI(data);
+  }
+
+  // ВІДПРАВКА ДАНИХ (POST)
+  async function sendToAPI(payload) {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Ігноруємо CORS при відправці
+      body: JSON.stringify(payload)
+    });
+    // Чекаємо трохи і завантажуємо оновлені дані
+    setTimeout(loadData, 1500);
   }
 
   function clearForm() {
@@ -346,18 +339,18 @@
     const btn = document.getElementById('submit-btn');
     btn.disabled = true; btn.innerText = 'Записую...';
     
-    callAPI({
+    sendToAPI({
       action: 'add',
       type: document.getElementById('type').value, 
       amount: amount, 
       tip: document.getElementById('tip').value || 0,
       clients: document.getElementById('clients').value || 0, 
       comment: document.getElementById('comment').value || ""
-    });
+    }).then(clearForm);
   }
 
   function deleteItem(row) { 
-    if (confirm("Видалити запис?")) callAPI({ action: 'delete', row: row }); 
+    if (confirm("Видалити запис?")) sendToAPI({ action: 'delete', row: row }); 
   }
 
   function openEdit(row) {
@@ -376,7 +369,7 @@
   function saveEdit() {
     const btn = document.getElementById('edit-save-btn');
     btn.disabled = true;
-    callAPI({
+    sendToAPI({
       action: 'update',
       row: document.getElementById('editRow').value,
       type: document.getElementById('editTypeVal').value, 
@@ -399,8 +392,8 @@
     } 
   }
 
-  // Початкове завантаження
-  window.onload = () => { callAPI(); };
+  // ЗАПУСК ЗАВАНТАЖЕННЯ
+  window.onload = loadData;
 </script>
   <input type="hidden" id="type" value="Прибуток">
 </body>
