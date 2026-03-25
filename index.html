@@ -213,207 +213,195 @@
   </div>
 
   <script>
-    // --------------------------------------------------------
-    // ВСТАВТЕ ВАШЕ ПОСИЛАННЯ З GOOGLE APPS SCRIPT ТУТ:
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFQt7DwT6ywwhZsC6EIJSIGTyEyXBIVAr8GX70tRMkpce796kRQKSfXbWQz-mOUP_7/exec";
-    // --------------------------------------------------------
+  // 1. ВСТАВТЕ ВАШ НОВИЙ URL ПІСЛЯ "NEW DEPLOYMENT" ТУТ:
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFQt7DwT6ywwhZsC6EIJSIGTyEyXBIVAr8GX70tRMkpce796kRQKSfXbWQz-mOUP_7/exec";
 
-    var myChart, lastData;
-    const swiper = document.getElementById('swiper');
-    const iconEdit = `<svg class="icon-svg icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-    const iconDelete = `<svg class="icon-svg icon-delete" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+  var myChart, lastData;
+  const swiper = document.getElementById('swiper');
+  
+  // Векторні іконки
+  const iconEdit = `<svg class="icon-svg icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+  const iconDelete = `<svg class="icon-svg icon-delete" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
 
-    async function callAPI(payload = null) {
-      const options = {
-        method: 'POST',
-        body: JSON.stringify(payload || { action: 'get' }),
-        mode: 'no-cors' // Google Script вимагає перенаправлення
-      };
-
-      // Оскільки Google Script при POST з no-cors не повертає тіло відповіді, 
-      // ми використовуємо GET для отримання даних і POST для запису.
-      if (!payload) {
-        try {
-          const res = await fetch(SCRIPT_URL);
-          const data = await res.json();
-          updateUI(data);
-        } catch (e) { console.error("Fetch error:", e); }
-      } else {
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        // Після відправки робимо паузу 1 сек і оновлюємо дані через GET
-        setTimeout(async () => {
-          const res = await fetch(SCRIPT_URL);
-          const data = await res.json();
-          updateUI(data);
-        }, 1000);
-      }
-    }
-
-    function clearForm() {
-      document.getElementById('amount').value = ''; document.getElementById('tip').value = ''; 
-      document.getElementById('comment').value = ''; document.getElementById('clients').value = '';
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = false;
-      btn.innerText = document.getElementById('type').value === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
-    }
-
-    function toggleDropdown() { document.getElementById('selectOptions').classList.toggle('show'); }
-    function toggleEditDropdown() { document.getElementById('editSelectOptions').classList.toggle('show'); }
-
-    function selectType(val, text) {
-      document.getElementById('type').value = val;
-      document.getElementById('selectedTypeText').innerText = text;
-      document.getElementById('selectOptions').classList.remove('show');
-      const btn = document.getElementById('submit-btn'), cli = document.getElementById('clients'), tip = document.getElementById('tip');
-      if(val === 'Витрата') { 
-        btn.className='btn btn-exp'; btn.innerText='Зберегти витрату'; cli.style.display='none'; tip.style.display='none';
-      } else { 
-        btn.className='btn btn-inc'; btn.innerText='Зберегти прибуток'; cli.style.display='block'; tip.style.display='block';
-      }
-    }
-
-    function selectEditType(val, text) {
-      document.getElementById('editTypeVal').value = val;
-      document.getElementById('selectedEditTypeText').innerText = text;
-      document.getElementById('editSelectOptions').classList.remove('show');
-      document.getElementById('editClients').style.display = (val === 'Витрата') ? 'none' : 'block';
-      document.getElementById('editTip').style.display = (val === 'Витрата') ? 'none' : 'block';
-    }
-
-    swiper.addEventListener('scroll', () => {
-      const index = Math.round(swiper.scrollLeft / window.innerWidth);
-      document.getElementById('dot1').classList.toggle('active', index === 0);
-      document.getElementById('dot2').classList.toggle('active', index === 1);
-    });
-
-    function initChart(chartData) {
-      const ctx = document.getElementById('lineChart').getContext('2d');
-      if (myChart) myChart.destroy();
-      myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: chartData.labels,
-          datasets: [
-            { label: 'Дохід', data: chartData.inc, borderColor: '#34c759', tension: 0.4, pointRadius: 2, fill: false },
-            { label: 'Витрати', data: chartData.exp, borderColor: '#ff3b30', tension: 0.4, pointRadius: 2, fill: false }
-          ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.3)', font: {size: 9} }, grid: { display: false } }, y: { display: false } } }
-      });
-    }
-
-    function updateUI(res) {
-      if (!res || typeof res === 'string') return;
-      lastData = res;
-      const m = res.month;
-      document.getElementById('m-inc').innerText = m.income;
-      document.getElementById('m-exp').innerText = m.expense;
-      document.getElementById('m-roi').innerText = m.roi + '%';
-      document.getElementById('m-cli').innerText = m.clients;
-      document.getElementById('m-tips').innerText = m.tips + ' ₴';
-      
-      const netEl = document.getElementById('m-net');
-      netEl.innerText = m.net + ' ₴';
-      netEl.style.color = m.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
-      
-      initChart(res.chart);
-      
-      document.getElementById('history-list').innerHTML = res.history.map(item => `
-        <div class="history-item">
-          <div class="h-info">
-            <span class="h-date">${item.date}</span>
-            <span class="h-comm">${item.comment || item.type}</span>
-          </div>
-          <div class="h-actions">
-            <div class="h-amount" style="color:${item.type==='Прибуток'?'var(--accent-green)':'var(--accent-red)'}">
-              ${item.type==='Прибуток' ? item.amount + ' ₴ + ' + item.tip + ' ₴' : '- ' + item.amount + ' ₴'}
-            </div>
-            <button class="btn-icon icon-edit" onclick="openEdit(${item.row})">${iconEdit}</button>
-            <button class="btn-icon icon-delete" onclick="deleteItem(${item.row})">${iconDelete}</button>
-          </div>
-        </div>`).join('');
-    }
-
-    function sendData() {
-      const amount = document.getElementById('amount').value;
-      if (!amount) return;
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true; btn.innerText = 'Записую...';
-      
-      callAPI({
-        action: 'add',
-        type: document.getElementById('type').value, 
-        amount: amount, 
-        tip: document.getElementById('tip').value || 0,
-        clients: document.getElementById('clients').value || 0, 
-        comment: document.getElementById('comment').value || ""
-      }).then(clearForm);
-    }
-
-    function deleteItem(row) { if (confirm("Видалити запис?")) callAPI({ action: 'delete', row: row }); }
-
-    function openEdit(row) {
-      const item = lastData.history.find(h => h.row === row);
-      if (!item) return;
-      document.getElementById('editRow').value = row;
-      selectEditType(item.type, item.type === 'Прибуток' ? '💰 Прибуток' : '💸 Витрата');
-      document.getElementById('editAmount').value = item.amount;
-      document.getElementById('editTip').value = item.tip;
-      document.getElementById('editClients').value = item.clients;
-      document.getElementById('editComment').value = item.comment;
-      document.getElementById('editModal').style.display = 'flex';
-    }
-
-    function saveEdit() {
-      const btn = document.getElementById('edit-save-btn'); btn.disabled = true;
-      callAPI({
-        action: 'update',
-        row: document.getElementById('editRow').value,
-        type: document.getElementById('editTypeVal').value, 
-        amount: document.getElementById('editAmount').value,
-        tip: document.getElementById('editTip').value || 0, 
-        clients: document.getElementById('editClients').value || 0, 
-        comment: document.getElementById('editComment').value || ""
-      }).then(() => {
-        closeEdit();
-        btn.disabled = false;
-      });
-    }
-    async function callAPI(payload = null) {
+  // 2. ГОЛОВНА ФУНКЦІЯ ЗВ'ЯЗКУ (ФІКС CORS)
+  async function callAPI(payload = null) {
     try {
       if (!payload) {
-        // Завантаження даних
+        // Отримання даних (GET)
         const res = await fetch(SCRIPT_URL);
         const data = await res.json();
         updateUI(data);
       } else {
-        // Відправка даних
-        // ВАЖЛИВО: Не ставимо заголовки Headers!
+        // Відправка даних (POST)
+        // mode: 'no-cors' дозволяє обійти обмеження браузера
         await fetch(SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors', // Для Apps Script це безпечно при відправці
+          mode: 'no-cors', 
           body: JSON.stringify(payload)
         });
 
-        // Оскільки 'no-cors' не дає прочитати відповідь, 
-        // робимо маленьку паузу і завантажуємо оновлені дані через GET
+        // Після POST ми не можемо прочитати відповідь через no-cors,
+        // тому через 1.5 сек робимо GET запит, щоб оновити екран
         setTimeout(async () => {
           const res = await fetch(SCRIPT_URL);
           const data = await res.json();
           updateUI(data);
+          clearForm();
         }, 1500);
       }
     } catch (err) {
-      console.error("API Error:", err);
+      console.error("Помилка зв'язку:", err);
     }
   }
 
-    function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
+  function clearForm() {
+    document.getElementById('amount').value = ''; 
+    document.getElementById('tip').value = ''; 
+    document.getElementById('comment').value = ''; 
+    document.getElementById('clients').value = '';
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = false;
+    btn.innerText = document.getElementById('type').value === 'Прибуток' ? 'Зберегти прибуток' : 'Зберегти витрату';
+  }
 
-    window.onclick = function(e) { if (!e.target.closest('.custom-select')) { document.getElementById('selectOptions').classList.remove('show'); document.getElementById('editSelectOptions').classList.remove('show'); } }
+  function toggleDropdown() { document.getElementById('selectOptions').classList.toggle('show'); }
+  function toggleEditDropdown() { document.getElementById('editSelectOptions').classList.toggle('show'); }
+
+  function selectType(val, text) {
+    document.getElementById('type').value = val;
+    document.getElementById('selectedTypeText').innerText = text;
+    document.getElementById('selectOptions').classList.remove('show');
+    const btn = document.getElementById('submit-btn'), cli = document.getElementById('clients'), tip = document.getElementById('tip');
+    if(val === 'Витрата') { 
+      btn.className='btn btn-exp'; btn.innerText='Зберегти витрату'; cli.style.display='none'; tip.style.display='none';
+    } else { 
+      btn.className='btn btn-inc'; btn.innerText='Зберегти прибуток'; cli.style.display='block'; tip.style.display='block';
+    }
+  }
+
+  function selectEditType(val, text) {
+    document.getElementById('editTypeVal').value = val;
+    document.getElementById('selectedEditTypeText').innerText = text;
+    document.getElementById('editSelectOptions').classList.remove('show');
+    const cli = document.getElementById('editClients'), tip = document.getElementById('editTip');
+    if (val === 'Витрата') { cli.style.display = 'none'; tip.style.display = 'none'; } 
+    else { cli.style.display = 'block'; tip.style.display = 'block'; }
+  }
+
+  swiper.addEventListener('scroll', () => {
+    const index = Math.round(swiper.scrollLeft / window.innerWidth);
+    document.getElementById('dot1').classList.toggle('active', index === 0);
+    document.getElementById('dot2').classList.toggle('active', index === 1);
+  });
+
+  function initChart(chartData) {
+    const ctx = document.getElementById('lineChart').getContext('2d');
+    if (myChart) myChart.destroy();
+    myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          { label: 'Дохід', data: chartData.inc, borderColor: '#34c759', tension: 0.4, pointRadius: 2, fill: false },
+          { label: 'Витрати', data: chartData.exp, borderColor: '#ff3b30', tension: 0.4, pointRadius: 2, fill: false }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.3)', font: {size: 9} }, grid: { display: false } }, y: { display: false } } }
+    });
+  }
+
+  function updateUI(res) {
+    if (!res || typeof res === 'string') return;
+    lastData = res;
+    const m = res.month;
+    document.getElementById('m-inc').innerText = m.income;
+    document.getElementById('m-exp').innerText = m.expense;
+    document.getElementById('m-roi').innerText = m.roi + '%';
+    document.getElementById('m-cli').innerText = m.clients;
+    document.getElementById('m-tips').innerText = m.tips + ' ₴';
+    const netEl = document.getElementById('m-net');
+    netEl.innerText = m.net + ' ₴';
+    netEl.style.color = m.net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+    initChart(res.chart);
     
-    window.onload = () => { callAPI(); };
-  </script>
+    document.getElementById('history-list').innerHTML = res.history.map(item => `
+      <div class="history-item">
+        <div class="h-info">
+          <span class="h-date">${item.date}</span>
+          <span class="h-comm">${item.comment || item.type}</span>
+        </div>
+        <div class="h-actions">
+          <div class="h-amount" style="color:${item.type==='Прибуток'?'var(--accent-green)':'var(--accent-red)'}">
+            ${item.type==='Прибуток' ? item.amount + ' ₴ + ' + item.tip + ' ₴' : '- ' + item.amount + ' ₴'}
+          </div>
+          <button class="btn-icon" onclick="openEdit(${item.row})">${iconEdit}</button>
+          <button class="btn-icon" onclick="deleteItem(${item.row})">${iconDelete}</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function sendData() {
+    const amount = document.getElementById('amount').value;
+    if (!amount) return;
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true; btn.innerText = 'Записую...';
+    
+    callAPI({
+      action: 'add',
+      type: document.getElementById('type').value, 
+      amount: amount, 
+      tip: document.getElementById('tip').value || 0,
+      clients: document.getElementById('clients').value || 0, 
+      comment: document.getElementById('comment').value || ""
+    });
+  }
+
+  function deleteItem(row) { 
+    if (confirm("Видалити запис?")) callAPI({ action: 'delete', row: row }); 
+  }
+
+  function openEdit(row) {
+    const item = lastData.history.find(h => h.row === row);
+    if (!item) return;
+    document.getElementById('editRow').value = row;
+    const typeText = item.type === 'Прибуток' ? '💰 Прибуток' : '💸 Витрата';
+    selectEditType(item.type, typeText);
+    document.getElementById('editAmount').value = item.amount;
+    document.getElementById('editTip').value = item.tip;
+    document.getElementById('editClients').value = item.clients;
+    document.getElementById('editComment').value = item.comment;
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function saveEdit() {
+    const btn = document.getElementById('edit-save-btn');
+    btn.disabled = true;
+    callAPI({
+      action: 'update',
+      row: document.getElementById('editRow').value,
+      type: document.getElementById('editTypeVal').value, 
+      amount: document.getElementById('editAmount').value,
+      tip: document.getElementById('editTip').value || 0, 
+      clients: document.getElementById('editClients').value || 0, 
+      comment: document.getElementById('editComment').value || ""
+    }).then(() => {
+      closeEdit();
+      btn.disabled = false;
+    });
+  }
+
+  function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
+
+  window.onclick = function(e) { 
+    if (!e.target.closest('.custom-select')) { 
+      document.getElementById('selectOptions').classList.remove('show'); 
+      document.getElementById('editSelectOptions').classList.remove('show'); 
+    } 
+  }
+
+  // Початкове завантаження
+  window.onload = () => { callAPI(); };
+</script>
   <input type="hidden" id="type" value="Прибуток">
 </body>
 </html>
